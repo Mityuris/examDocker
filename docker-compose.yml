@@ -1,23 +1,27 @@
 version: "3.3"
 
 services:
-
+  flaskapp:
+    build: 
+      context: "."
+      dockerfile: "flask.dockerfile"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flaskapp.rule=Host(`localhost`)"
+      - "traefik.http.services.flaskapp.loadbalancer.server.port=5000"
+    ports:
+      - "5000:5000"
   traefik:
-    image: "traefik:v2.11"
-    container_name: "traefik"
+    image: traefik:v2.5
     command:
-      #- "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.myresolver.acme.email=postmaster@example.com"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.address=:80"
     ports:
-      - "443:443"
+      - "80:80"
       - "8080:8080"
     volumes:
-      - "./letsencrypt:/letsencrypt"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+

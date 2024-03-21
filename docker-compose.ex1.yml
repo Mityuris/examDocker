@@ -5,10 +5,13 @@ services:
       - "8081:80"
     networks:
       - dblink
+      - traefik1
   apache:
     image: httpd
     ports:
       - "8082:80"
+    networks:
+      - traefik2
   mySQL:
     image: mysql
     environment:
@@ -17,24 +20,43 @@ services:
       - "8083:80"
     networks:
       - dblink
+      - traefik3
     volumes:
-      - dbpersistance
+      - dbpersistance:/persistance
   redis:
     image: redis
     ports:
       - "8084:80"
+    networks:
+      - traefik4
   mongoDB:
     image: mongo
     ports:
       - "8085:80"
     volumes:
-      - dbpersistance
+      - dbpersistance:/persistance
+    networks:
+      - traefik5
   flaskapp:
-    build: flask.dockerfile
+    build: 
+      context: "./"
+      dockerfile: "flask.dockerfile"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.local`)"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
     ports:
       - "8090:80"
+    networks:
+      - traefik6
 
 networks:
+  traefik1:
+  traefik2:
+  traefik3:
+  traefik4:
+  traefik5:
+  traefik6:
   dblink:
 
 volumes:
