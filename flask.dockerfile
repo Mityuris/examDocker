@@ -1,0 +1,1 @@
+FROM redislabs/redis-webcli
